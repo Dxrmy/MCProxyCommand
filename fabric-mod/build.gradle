@@ -1,15 +1,14 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'com.modrinth.minotaur' version '2.+'
 }
 
 // Fabric Properties. Check these on https://modmuss50.me/fabric.html
-def minecraft_version='1.21.4'
+def minecraft_version='26.2'
 
-def yarn_mappings='1.21.4+build.2'
-def loader_version='0.16.9'
+def loader_version='0.16.0'
 
-def fabric_version='0.113.0+1.21.4'
+def fabric_version='0.101.0+26.2'
 
 repositories {
     // NOTE This should currently be not needed, but to fiddle around with this dependency issue
@@ -19,43 +18,16 @@ repositories {
     }
 }
 
+loom.noIntermediateMappings()
+
 dependencies {
-    // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
-
-    // Fabric API
-    // It took 2 days to find out, that the dependency mods use or require the deprecated api of fabric,
-    // which is distributed with the fabric-api release on modrinth. How is something like this happening?
-    // Even after figuring this out, the stuff distributed there does not work with these mod dependencies,
-    // although the mods and versions are completely identical. I made dependency diffs and checked them myself:
-    // except the fabric-gametest-api-v1 everything was present and equal.
-    //modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    //modImplementation("net.fabricmc.fabric-api:fabric-api-deprecated:${fabric_version}") {
-    //exclude group: 'fabric-api-deprecated', module 'fabric-gametest-api-v1'
-    //}
-    // However, depending on the modrinth version of fabric-api works, so we just go with that and ignore
-    // this weirdness
-    //modImplementation "maven.modrinth:fabric-api:${project.fabric_version}"
-    // But if we do this, then the code for this project does not know fabric-api, so we just declare them
-    // as compile time
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api-deprecated:${fabric_version}"
-
-    // NOTE To work with the problems above, place these mods inside the mods folder
-    // List of mods:
-    // * Fabric-API 0.113.0+1.21.4
-    // * FabricProxy-Lite 2.9.0
-
-    // FabricProxy-Lite including transitives
-    // https://github.com/OKTW-Network/FabricProxy-Lite
-    modImplementation 'maven.modrinth:fabricproxy-lite:v2.9.0'
-    modImplementation 'com.moandjiezana.toml:toml4j:0.7.2'
-
-
-    // TODO These problems here could occur because loom, fabric or sponge or just something remaps the stuff
-    // Error got because Identifier is null
+    compileOnly files('/mnt/nvme0n1p2/bl/minecraft/network/hub/versions/26.2/server-26.2.jar')
+    compileOnly fileTree(dir: '/mnt/nvme0n1p2/bl/minecraft/network/hub/libraries', include: '**/*.jar')
+    compileOnly fileTree(dir: '/mnt/nvme0n1p2/bl/minecraft/network/hub/.fabric/processedMods', include: '*.jar')
+    compileOnly fileTree(dir: '/mnt/nvme0n1p2/bl/minecraft/network/hub/fabric/.fabric/processedMods', include: '*.jar')
+    compileOnly files('/mnt/nvme0n1p2/bl/minecraft/network/hub/mods/FabricProxy-Lite.jar')
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
 
     implementation project(':common')
     include project(':common')
@@ -71,7 +43,7 @@ modrinth {
         required.project 'fabric-api'
         required.project 'fabricproxy-lite'
     }
-    uploadFile = remapJar
+    uploadFile = jar
     syncBodyFrom = rootProject.file("README.md").text
 
     // Use the environment variable `$MODRINTH_TOKEN` for the token
@@ -100,12 +72,15 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
+base {
+    archivesName = "$rootProject.name-fabric"
+}
+
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        toolchain.languageVersion = JavaLanguageVersion.of(25)
     }
-    archivesBaseName = "$rootProject.name-fabric"
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
     // If you remove this line, sources will not be generated.

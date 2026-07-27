@@ -1,50 +1,58 @@
-# Proxy Command
+<div align="center">
 
-A command that allows to send commands from you minecraft server instances to a velocity proxy.
+# 🔀 MCProxyCommand
+**High-performance proxy command bridge for Minecraft 26.2 & Velocity**
 
+[![Minecraft](https://img.shields.io/badge/Minecraft-26.2+-brightgreen?style=for-the-badge&logo=minecraft)](https://minecraft.net/)
+[![Fabric](https://img.shields.io/badge/Fabric-0.19.3+-blue?style=for-the-badge&logo=fabric)](https://fabricmc.net/)
+[![Velocity](https://img.shields.io/badge/Velocity-3.4.0+-purple?style=for-the-badge&logo=paper)](https://papermc.io/)
+[![Fork](https://img.shields.io/badge/Fork-GeraldTM%2FMCProxyCommand-gray?style=for-the-badge&logo=github)](https://github.com/GeraldTM/MCProxyCommand)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-## Installation
+</div>
 
-To install this mod on fabric minecraft servers these requirements must be met:
-* **fabric** and **[fabric API](https://modrinth.com/mod/fabric-api)** is installed on your minecraft servers
-* **[FabricProxy-Lite](https://modrinth.com/mod/fabricproxy-lite)** is installed and working on you minecraft servers
-* You have a velocity server up and running
-* You must install both the fabric mod and the velocity plugin
+---
 
-Both the fabric mod and the velocity plugin are available on [modrinth](https://modrinth.com/mod/proxy-command-reloaded) with slug `proxy-command-reloaded`
+## 📖 About MCProxyCommand
 
-The project source is available on [github/GeraldTM](https://github.com/GeraldTM/MCProxyCommand) with the latest
-readme [here](https://github.com/GeraldTM/MCProxyCommand/blob/master/README.md).
+**MCProxyCommand** is a seamless communication bridge between Fabric 26.2 backend servers and Velocity proxy networks. This repository is a 26.2 fork of the original project by [GeraldTM](https://github.com/GeraldTM/MCProxyCommand), upgraded to support Minecraft 26.2 unobfuscated Mojang mappings and Java 25.
 
+Engineered specifically for **Minecraft 26.2**, it leverages native unobfuscated Mojang mappings, modern Fabric Networking API (`CustomPacketPayload`, `clientboundPlay`), and high-efficiency byte buffer codecs.
 
-## Usage instructions
+---
 
-On minecraft server instances the command `proxycommand "[command]"` can get used via command blocks or other
-command sources, where a player is the source. The player must be a source of the command, since the plugin and
-velocity needs this to handle the context of the command execution and send e.g. error messages back to
-the player.
+## ✨ Features
 
-For example, you can teleport all players to a different server with a command block using
+- **26.2 Native Compatibility:** Native Mojang-mapped Fabric mod targeting Minecraft 26.2 and Java 25.
+- **Velocity Integration:** Companion Velocity plugin to execute proxy actions securely on behalf of connected players.
+- **GUI & Command Block Support:** Seamlessly execute `/proxycommand "server <name>"` from server menus, NPC interactions, or command blocks.
+- **Stateless & Lightweight:** Zero background thread overhead on both the proxy and backend servers.
+
+---
+
+## 🚀 Installation
+
+1. **Backend Server (Fabric 26.2):**
+   - Install **Fabric API** (`0.155.2+26.2` or later).
+   - Install **FabricProxy-Lite**.
+   - Place `proxy-command-fabric-0.jar` into your `mods/` directory.
+
+2. **Proxy Server (Velocity):**
+   - Place `proxy-command-velocity-0.jar` into your Velocity `plugins/` directory.
+
+---
+
+## 💡 Usage
+
+Execute `/proxycommand "<command>"` on the backend server with a player as the command source:
+
+```mcfunction
+execute as @a run proxycommand "server main"
 ```
-execute as @a run proxycommand "server SERVERNAME"
-```
 
+---
 
+## 📄 License
 
-
-## Changelog
-
-Changelog per release cycle can be found [here](https://github.com/GeraldTM/MCProxyCommand/blob/master/CHANGELOG.md).
-This changelog contains information from one release to the next one.
-
-
-## License
-
-[MIT License](https://github.com/GeraldTM/MCProxyCommand/blob/master/LICENSE)
-
-
-## Additional reading (for devs)
-
-* [Fabric wiki](https://fabricmc.net/wiki/start)
-* [Multiloader template](https://github.com/jaredlll08/MultiLoader-Template)
+This project is licensed under the [MIT License](LICENSE).
 

@@ -3,35 +3,35 @@ package de.michiruf.proxycommand.fabric;
 import de.michiruf.proxycommand.common.ProxyCommandConstants;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 public class S2CPacket {
 
-  public record ProxyCommandPacket(String command) implements CustomPayload {
-    public static final CustomPayload.Id<ProxyCommandPacket> PACKET_ID = new CustomPayload.Id<>(
-      Identifier.of(ProxyCommandConstants.COMMAND_PACKET_ID)
+  public record ProxyCommandPacket(String command) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<ProxyCommandPacket> PACKET_TYPE = new CustomPacketPayload.Type<>(
+      Identifier.parse(ProxyCommandConstants.COMMAND_PACKET_ID)
     );
-    public static final PacketCodec<PacketByteBuf, ProxyCommandPacket> PACKET_CODEC = PacketCodec.of(
-      (value, buf) -> buf.writeString(value.command),
-      buf -> new ProxyCommandPacket(buf.readString())
+    public static final StreamCodec<RegistryFriendlyByteBuf, ProxyCommandPacket> PACKET_CODEC = StreamCodec.of(
+      (buf, value) -> buf.writeUtf(value.command),
+      buf -> new ProxyCommandPacket(buf.readUtf())
     );
     @Override
-    public Id<? extends CustomPayload> getId() {
-      return PACKET_ID;
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+      return PACKET_TYPE;
     }
   }
 
   public S2CPacket() {
     PayloadTypeRegistry
-      .playS2C()
-      .register(ProxyCommandPacket.PACKET_ID, ProxyCommandPacket.PACKET_CODEC);
+      .clientboundPlay()
+      .register(ProxyCommandPacket.PACKET_TYPE, ProxyCommandPacket.PACKET_CODEC);
   }
 
-  public void sendCommandPacket(ServerPlayerEntity player, String command) {
+  public void sendCommandPacket(ServerPlayer player, String command) {
     ServerPlayNetworking.send(player, new ProxyCommandPacket(command));
   }
 }

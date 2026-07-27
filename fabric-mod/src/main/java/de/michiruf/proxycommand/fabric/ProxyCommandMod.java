@@ -1,19 +1,15 @@
 package de.michiruf.proxycommand.fabric;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import de.michiruf.proxycommand.common.ProxyCommandConstants;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +32,13 @@ public class ProxyCommandMod implements ModInitializer {
   }
 
   private static void registerCommand(
-    CommandDispatcher<ServerCommandSource> dispatcher
+    CommandDispatcher<CommandSourceStack> dispatcher
   ) {
-    LiteralCommandNode<ServerCommandSource> proxyCommand = CommandManager
+    LiteralCommandNode<CommandSourceStack> proxyCommand = Commands
       .literal("proxycommand")
-      .requires(cmd -> cmd.hasPermissionLevel(2))
+      .requires(cmd -> cmd.isPlayer())
       .then(
-        CommandManager
+        Commands
           .argument("command", StringArgumentType.string())
           .executes(ProxyCommandMod::sendMessage)
           .build()
@@ -51,17 +47,17 @@ public class ProxyCommandMod implements ModInitializer {
     dispatcher.getRoot().addChild(proxyCommand);
   }
 
-  private static int sendMessage(CommandContext<ServerCommandSource> context) {
+  private static int sendMessage(CommandContext<CommandSourceStack> context) {
     var command = StringArgumentType.getString(context, "command");
 
-    var player = context.getSource().getPlayer();
+    ServerPlayer player = context.getSource().getPlayer();
     if (player == null) {
       LOGGER.warn(
         "Command \"" + command + "\" was executed without the player as source"
       );
       context
         .getSource()
-        .sendMessage(Text.literal("Command source must be a player"));
+        .sendFailure(Component.literal("Command source must be a player"));
       return -1;
     }
 
